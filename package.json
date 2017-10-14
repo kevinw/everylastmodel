@@ -10,8 +10,11 @@
     "author": "Kevin Watters",
     "license": "ISC",
     "dependencies": {
+        "cheerio": "^1.0.0-rc.2",
         "headless-gl": "latest",
-        "pngjs": "^3.3.0"
+        "pngjs": "^3.3.0",
+        "request": "^2.83.0",
+        "unzip": "^0.1.11"
     },
     "devDependencies": {
         "http-server": "^0.10.0"

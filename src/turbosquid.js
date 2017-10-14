@@ -1,4 +1,5 @@
 const cheerio = require("cheerio");
+const path = require("path");
 const request = require("request").defaults({jar: true});
 const util = require("util");
 const fs = require("fs");
@@ -39,30 +40,30 @@ function ensureLoggedIn(cb) {
     });
 }
 
-function searchFor(term) {
+function download(term, cb) {
     ensureLoggedIn(function() {
         request(util.format(SEARCH_URL, term), function (err, response, html) {
-            if (err) throw err;
+            if (err) return cb(err);
             const $ = cheerio.load(html);
             const resultDivs = $("#SearchResultAssets > div");
 
             const randomResult = resultDivs[Math.floor(Math.random() * resultDivs.length)];
             const idStr = randomResult.attribs.id;
-            if (idStr.substr(0, 5) !== "Asset")
-                throw new Error("expected id to be AssetXXX");
+            if (!idStr || idStr.substr(0, 5) !== "Asset")
+                return cb(new Error("expected id to be AssetXXX:\n\n" + util.inspect(randomResult)));
             const id = parseInt(idStr.substr(5), 10);
 
             if (isNaN(id))
-                throw new Error("expected a parsable int: " + idStr);
+                return cb(new Error("expected a parsable int: " + idStr));
 
             console.log("randomly selected model id", id);
 
             request(util.format(DOWNLOAD_URL, id), function (err, response, html) {
-                if (err) throw err;
+                if (err) return cb(err);
 
                 const productJSON = html.match(/purchasedProductFileJSON = (.*);/)[1];
                 if (!productJSON)
-                    throw new Error("expected purchasedProductFileJSON in result");
+                    return cb(new Error("expected purchasedProductFileJSON in result"));
 
                 const products = JSON.parse(productJSON);
                 console.dir(products);
@@ -74,14 +75,18 @@ function searchFor(term) {
                             continue;
 
                         const fileUrl = util.format(FILE_URL, id, file.FILEITEMID);
-                        const name = file.NAME;
 
-                        console.log(util.format("downloading %s (%s)", name, file.SIZE_KB));
+                        const modelsDirectory = path.resolve(__dirname, "..", ".downloaded");
+                        if (!fs.existsSync(modelsDirectory))
+                            fs.mkdirSync(modelsDirectory);
+                        const name = path.resolve(modelsDirectory, file.NAME);
+
+                        console.log(util.format("downloading %s (%s)", file.NAME, file.SIZE_KB));
                         request(fileUrl)
-                            .on('error', function(err) { throw err; })
+                            .on('error', function(err) { return cb(err); })
                             .pipe(fs.createWriteStream(name))
                             .on('finish', function() {
-                                onFileDownloaded(name);
+                                cb(null, name);
                             });
 
                         break;
@@ -92,29 +97,31 @@ function searchFor(term) {
     });
 }
 
-function onFileDownloaded(name) {
-    const dir = 'tmp';
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir);
-
-    const nameLower = name.toLowerCase();
-    if (nameLower.endsWith(".zip")) {
-        console.log("unzipping", name);
-        fs.createReadStream(name).pipe(unzip.Extract({path: dir}));
-    }
-}
+module.exports.download = download;
+module.exports.allowedFormats = allowedFormats;
 
 if (require.main === module)
 {
     const term = process.argv[2];
-    if (!term)
+    if (term === "unzip")
     {
-        console.error("usage: node turbosquid SEARCH_TERM");
-        process.exit(1);
+        extractModel(process.argv[3], function(err, files) {
+            if (err) throw err;
+            console.log("result", files);
+        });
     }
     else
     {
-        console.log("searching for", term);
-        searchFor(term);
+        if (!term)
+        {
+            console.error("usage: node turbosquid SEARCH_TERM");
+            process.exit(1);
+        }
+        else
+        {
+            console.log("searching for", term);
+            searchFor(term);
+        }
     }
 }
     

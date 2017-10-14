@@ -1,0 +1,19 @@
+{
+    "name": "modelbot",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "devserver": "node_modules/.bin/http-server",
+        "generate": "node src/headless.js"
+    },
+    "author": "Kevin Watters",
+    "license": "ISC",
+    "dependencies": {
+        "headless-gl": "latest",
+        "pngjs": "^3.3.0"
+    },
+    "devDependencies": {
+        "http-server": "^0.10.0"
+    }
+}

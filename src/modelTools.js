@@ -1,4 +1,5 @@
 const fs = require("fs");
+const util = require("util");
 const child_process = require("child_process");
 const path = require("path");
 const turbosquid = require("./turbosquid");
@@ -13,22 +14,19 @@ function replaceExtension(filename, newExt) {
 
 assert.equal(replaceExtension("baz/foo.bar", "meep"), path.join("baz", "foo.meep"));
 
-function getModel(searchTerm, cb)
+module.exports.getModel = function getModel(searchTerm, cb)
 {
-    turboSquid.download(searchTerm, function(err, filename) {
+    turbosquid.download(searchTerm, function(err, filename) {
         if (err) return cb(err);
         afterDownload(filename, cb);
     });
-}
+};
 
 function pickModelFile(files) {
-    for (const file of files) {
-        for (const ext of turbosquid.allowedFormats) {
-            if (file.toLowerCase().endsWith(ext)) {
+    for (const file of files)
+        for (const ext of turbosquid.allowedFormats)
+            if (file.toLowerCase().endsWith(ext))
                 return file;
-            }
-        }
-    }
 }
 
 function afterDownload(name, cb) {
@@ -55,29 +53,56 @@ function afterDownload(name, cb) {
     });
 }
 
+function mkdirs(targetDir)
+{
+    const fs = require('fs');
+    const path = require('path');
+    const sep = path.sep;
+    const initDir = path.isAbsolute(targetDir) ? sep : '';
+    targetDir.split(sep).reduce((parentDir, childDir) => {
+        const curDir = path.resolve(parentDir, childDir);
+        if (!fs.existsSync(curDir))
+            fs.mkdirSync(curDir);
+        return curDir;
+    }, initDir);
+}
 
 function extractModel(name, cb) {
     if (!fs.existsSync(name))
         return cb(new Error("extractModel give " + name + " but it doesn't exist on disk"));
+
     const nameLower = name.toLowerCase();
     const extractTo = path.dirname(name);
     const results = [];
+
     if (nameLower.endsWith(".zip")) {
         console.log("unzipping", name);
         fs.createReadStream(name)
             .pipe(unzip.Parse())
             .on('entry', function (entry) {
+                if (entry.type !== "File")
+                    return entry.autodrain();
+
+                console.log(util.inspect(entry));
                 const fileName = entry.path;
                 const absPath = path.resolve(extractTo, fileName);
+                const dirname = path.dirname(absPath);
+                mkdirs(dirname);
+                const stat = fs.lstatSync(dirname);
+                if (!stat.isDirectory())
+                    return cb(new Error("expected a directory, but something else: " + dirname));
+                const writePipe = fs.createWriteStream(absPath);
+                entry.pipe(writePipe);
                 results.push(absPath);
-                entry.pipe(fs.createWriteStream(absPath));
             })
             .on('close', function() {
                 cb(null, results);
             });
     }
     else
+    {
         cb(null, [name]);
+    }
 }
 
 if (require.main === module) {

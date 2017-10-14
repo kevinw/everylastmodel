@@ -1,4 +1,5 @@
 const express = require("express");
+const util = require("util");
 const bodyParser = require("body-parser");
 const router = exports.router = express.Router();
 const modelTools = require("./modelTools");
@@ -10,8 +11,13 @@ router.get("/model/:searchTerm", function (req, res) {
         throw new Error("must specify a search term");
 
     modelTools.getModel(searchTerm, function(err, filename) {
-        if (err) throw err;
-        res.send(filename);
+        if (err)
+        {
+            console.error(err.stack);
+            res.status(500).send(util.format("<pre>%s</pre>", err.stack));
+        }
+        else
+            res.send(filename);
     });
 
 });

@@ -12,6 +12,8 @@
     "dependencies": {
         "cheerio": "^1.0.0-rc.2",
         "headless-gl": "latest",
+        "node-7z": "^0.4.0",
+        "node-unrar-js": "^0.8.1",
         "pngjs": "^3.3.0",
         "request": "^2.83.0",
         "unzip": "^0.1.11"

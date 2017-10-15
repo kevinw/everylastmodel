@@ -3,7 +3,6 @@ const path = require("path");
 const request = require("request").defaults({jar: true});
 const util = require("util");
 const fs = require("fs");
-const unzip = require("unzip");
 
 const DOMAIN = "https://www.turbosquid.com/";
 const LOGIN_URL = DOMAIN + "Login/Index.cfm";
@@ -11,7 +10,14 @@ const SEARCH_URL = DOMAIN + "3d-model/%s?max_price=0&min_price=0";
 const DOWNLOAD_URL = DOMAIN + "AssetManager/Index.cfm?stgAction=getFiles&subAction=Download&intID=%s&intType=3";
 const FILE_URL = "https://storage9.turbosquid.com/Download/index.php?ID=%s_%s";
 
-const allowedFormats = ["fbx", "stl", "obj", "3ds", "max", "ma"];
+const allowedFormats = ["fbx", "dae", "gltf", "glb", "blend", "3ds", "ase",
+    "obj", "ifc", "xgl", "zgl", "ply", "dxf", "lwo", "lws",
+    "lxo", "stl", "x", "ac", "ms3d", "cob", "scn", "ogex",
+    "x3d", "3mf", "bvh", "csm", "xml", "irrmesh", "irr",
+    "mdl", "md2", "md3", "pk3", "mdc", "md5", "smd", "vta",
+    "ogex", "3d", "b3d", "q3d", "q3s", "nff", "nff", "off",
+    "raw", "ter", "mdl", "hmp", "ndo"
+];
 
 function ensureLoggedIn(cb) {
     if (!process.env.TURBOSQUID_USERNAME || !process.env.TURBOSQUID_PASSWORD)
@@ -32,9 +38,8 @@ function ensureLoggedIn(cb) {
         request.post({
             url: LOGIN_URL,
             form: formInput,
-        }, function (err, response, body) {
+        }, function (err, _response, _body) {
             if (err) throw err;
-
             cb();
         });
     });
@@ -58,15 +63,22 @@ function download(term, cb) {
 
             console.log("randomly selected model id", id);
 
-            request(util.format(DOWNLOAD_URL, id), function (err, response, html) {
-                if (err) return cb(err);
+            const downloadUrl = util.format(DOWNLOAD_URL, id);
+            console.log("triggering download url " + downloadUrl);
+            request(downloadUrl, function (err, response, html) {
+                if (err) {
+                    console.error(err);
+                    return cb(err);
+                }
+
+                console.log("got " + html.length + " bytes response");
 
                 const productJSON = html.match(/purchasedProductFileJSON = (.*);/)[1];
                 if (!productJSON)
                     return cb(new Error("expected purchasedProductFileJSON in result"));
 
                 const products = JSON.parse(productJSON);
-                console.dir(products);
+                //console.dir(products);
 
                 for (const file of products.FILE_SYSTEM) {
                     if (file.PRODUCT_ID === id && file.ISMAINFILE === 1 && file.IS_FILE === 1)
@@ -99,30 +111,3 @@ function download(term, cb) {
 
 module.exports.download = download;
 module.exports.allowedFormats = allowedFormats;
-
-if (require.main === module)
-{
-    const term = process.argv[2];
-    if (term === "unzip")
-    {
-        extractModel(process.argv[3], function(err, files) {
-            if (err) throw err;
-            console.log("result", files);
-        });
-    }
-    else
-    {
-        if (!term)
-        {
-            console.error("usage: node turbosquid SEARCH_TERM");
-            process.exit(1);
-        }
-        else
-        {
-            console.log("searching for", term);
-            searchFor(term);
-        }
-    }
-}
-    
-

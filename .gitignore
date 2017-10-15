@@ -1,3 +1,4 @@
+.localconfig.json
 node_modules/
 output.png
 .downloaded/

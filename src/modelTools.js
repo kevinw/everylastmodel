@@ -2,8 +2,6 @@ const fs = require("fs");
 const child_process = require("child_process");
 const path = require("path");
 const turbosquid = require("./turbosquid");
-//const unzip = require("unzip");
-//const unrar = require("node-unrar-js");
 const assert = require("assert");
 
 const ASSIMP_EXEC = require("../.localconfig.json").assimp2json.win;

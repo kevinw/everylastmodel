@@ -11,13 +11,16 @@
     "license": "ISC",
     "dependencies": {
         "cheerio": "^1.0.0-rc.2",
+        "gl": "^4.0.4",
         "headless-gl": "latest",
         "node-7z": "^0.4.0",
         "node-unrar-js": "^0.8.1",
         "pngjs": "^3.3.0",
         "request": "^2.83.0",
+        "three": "^0.87.1",
         "twit": "^2.2.9",
-        "unzip": "^0.1.11"
+        "unzip": "^0.1.11",
+        "xmlhttprequest": "^1.8.0"
     },
     "devDependencies": {
         "express": "^4.16.2",

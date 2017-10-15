@@ -1,8 +1,14 @@
+var text = "test headless";
+
+var modelUrl = "/.downloaded/cartDog.obj";
+
 var THREE = window.THREE || {};
+
+text = window.displayText || "Foobar";
+modelUrl = window.modelUrl || modelUrl;
 
 var textGeo;
 var textMesh1, textMesh2;
-var text = window.displayText || "Foobar";
 
 function loadFont() {
     var loader = new THREE.FontLoader();
@@ -99,15 +105,7 @@ const w = (400)*F;
 const h = (400)*F;
 
 var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera(75, w/h, 0.1, 1000);
-
-var renderer = new THREE.WebGLRenderer({ });
-renderer.setSize(w, h);
-document.body.appendChild(renderer.domElement);
-var style = renderer.domElement.style;
-style.width = Math.floor(w/F) + "px";
-style.height = Math.floor(h/F) + "px";
-
+var camera;
 
 var light = new THREE.HemisphereLight( 0xffffbb, 0x080820, .8 );
 scene.add( light );
@@ -188,11 +186,6 @@ function fitCameraToObj(camera, obj)
     return size;
 }
 
-var loader;
-if (window.modelUrl.toLowerCase().endsWith(".obj"))
-    loader = new THREE.OBJLoader();
-else
-    loader = new THREE.AssimpJSONLoader();
 
 function getCenterPoint(mesh) {
     var geometry = mesh.geometry;
@@ -216,29 +209,83 @@ function getObject3DCenter(obj3d) {
     return center;
 }
 
-function render() {
-    requestAnimationFrame(render);
-    renderer.clear();
-    renderer.render(scene, camera);
+var renderer;
+
+
+function loadAnyModel(path, cb) {
+    var loader;
+    if (path.toLowerCase().endsWith(".obj"))
+        loader = new THREE.OBJLoader();
+    else
+        loader = new THREE.AssimpJSONLoader();
+
+    function err(e) {
+        console.log("Loader failed", e);
+        console.dir(e);
+    }
+
+    loader.load(path, cb, null, err);
 }
 
-loader.load(window.modelUrl, function(obj) {
-    scene.add(obj);
+function start(givenRenderer, rtTexture, cb) {
+    if (givenRenderer)
+        renderer = givenRenderer;
+    else
+    {
+        renderer = new THREE.WebGLRenderer({ });
+        renderer.setSize(w, h);
+        document.body.appendChild(renderer.domElement);
+        var style = renderer.domElement.style;
+        style.width = Math.floor(w/F) + "px";
+        style.height = Math.floor(h/F) + "px";
+    }
 
-    var textSize = measureSize(textGroup);
-    var objCenter = getObject3DCenter(obj);
-    obj.position.sub(objCenter);
-    var objSize = measureSize(obj);
+    var aspect = 1;
+    camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
 
-    var factor = textSize.x  / objSize.x;
-    console.log(factor);
-    textGroup.scale.set(1/factor, 1/factor, 1/factor);
+    function render() {
+        if (!window.isHeadless) requestAnimationFrame(render);
+        renderer.clear();
+        renderer.render(scene, camera, rtTexture, true);
+        if (cb)
+        {
+            cb();
+            cb = undefined;
+        }
+    }
 
-    fitCameraToObj(camera, scene);
+    loadAnyModel(modelUrl, function(obj) {
+        scene.add(obj);
 
-    var controls = new THREE.OrbitControls( camera, renderer.domElement );
-    controls.addEventListener("change", render); // remove when using animation loop
+        var textSize = measureSize(textGroup);
+        var objCenter = getObject3DCenter(obj);
+        obj.position.sub(objCenter);
+        var objSize = measureSize(obj);
 
-    render();
-});
+        var factor = textSize.x  / objSize.x;
+        console.log(factor);
+        textGroup.scale.set(1/factor, 1/factor, 1/factor);
+
+        fitCameraToObj(camera, scene);
+
+        if (!window.isHeadless)
+        {
+            var controls = new THREE.OrbitControls( camera, renderer.domElement );
+            controls.addEventListener("change", render); // remove when using animation loop
+        }
+
+        render();
+    });
+}
+
+if (!window.isHeadless)
+{
+    console.log("NOT HEADLESS, STARTING");
+    start();
+}
+else
+{
+    console.log("HEADLESS, exporting start");
+    module.exports.start = start;
+}
 

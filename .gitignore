@@ -1,4 +1,5 @@
 .localconfig.json
+.twitter_secrets.js
 node_modules/
 output.png
 .downloaded/

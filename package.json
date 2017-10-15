@@ -16,6 +16,7 @@
         "node-unrar-js": "^0.8.1",
         "pngjs": "^3.3.0",
         "request": "^2.83.0",
+        "twit": "^2.2.9",
         "unzip": "^0.1.11"
     },
     "devDependencies": {

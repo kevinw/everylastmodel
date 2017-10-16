@@ -21,13 +21,13 @@ function tweetImageFile(imageFile) {
                 console.error(err);
             else {
                 // now we can reference the media and post a tweet (media will attach to the tweet)
-                var params = { status: 'loving life #nofilter', media_ids: [mediaIdStr] };
+                var params = { status: '', media_ids: [mediaIdStr] };
 
                 T.post('statuses/update', params, function (err, data, _response) {
                     if (err)
                         console.error(err);
                     else
-                        console.log(data);
+                        console.log("tweeted " + data.id_str);
                 });
             }
         });

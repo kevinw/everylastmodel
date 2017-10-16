@@ -47,17 +47,32 @@ function ensureLoggedIn(cb) {
 
 function download(term, cb) {
     ensureLoggedIn(function() {
-        request(util.format(SEARCH_URL, term), function (err, response, html) {
+        const searchUrl = util.format(SEARCH_URL, term);
+        console.log("opening " + searchUrl);
+        request(searchUrl, function (err, response, html) {
+            fs.writeFileSync("output.html", html);
             if (err) return cb(err);
             const $ = cheerio.load(html);
-            const resultDivs = $("#SearchResultAssets > div");
-
-            const randomResult = resultDivs[Math.floor(Math.random() * resultDivs.length)];
-            const idStr = randomResult.attribs.id;
-            if (!idStr || idStr.substr(0, 5) !== "Asset")
-                return cb(new Error("expected id to be AssetXXX:\n\n" + util.inspect(randomResult)));
-            const id = parseInt(idStr.substr(5), 10);
-
+            let idStr;
+            if ($("body").attr("id") === "FullPreview")
+            {
+                const productId = $("#ProductID");
+                console.log("product", productId);
+                idStr = productId.text();
+                console.log("!", idStr);
+                if (!idStr)
+                    return cb(new Error("expected td#ProductId"));
+            }
+            else
+            {
+                const resultDivs = $("#SearchResultAssets > div");
+                const randomResult = resultDivs[Math.floor(Math.random() * resultDivs.length)];
+                idStr = randomResult.attribs.id;
+                if (!idStr || idStr.substr(0, 5) !== "Asset")
+                    return cb(new Error("expected id to be AssetXXX:\n\n" + util.inspect(randomResult)));
+                idStr = idStr.substr(5);
+            }
+            const id = parseInt(idStr, 10);
             if (isNaN(id))
                 return cb(new Error("expected a parsable int: " + idStr));
 
@@ -79,6 +94,8 @@ function download(term, cb) {
 
                 const products = JSON.parse(productJSON);
                 //console.dir(products);
+                //
+                let didRequest = false;
 
                 for (const file of products.FILE_SYSTEM) {
                     if (file.PRODUCT_ID === id && file.ISMAINFILE === 1 && file.IS_FILE === 1)
@@ -94,6 +111,7 @@ function download(term, cb) {
                         const name = path.resolve(modelsDirectory, file.NAME);
 
                         console.log(util.format("downloading %s (%s)", file.NAME, file.SIZE_KB));
+                        didRequest = true;
                         request(fileUrl)
                             .on('error', function(err) { return cb(err); })
                             .pipe(fs.createWriteStream(name))
@@ -104,6 +122,9 @@ function download(term, cb) {
                         break;
                     }
                 }
+
+                if (!didRequest)
+                    return cb(new Error("no matching product_ids"));
             });
         });
     });

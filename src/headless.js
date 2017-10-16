@@ -2,6 +2,7 @@
 
 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 var fs = require('fs');
+var path = require("path");
 
 console.assert(XMLHttpRequest);
 
@@ -24,7 +25,7 @@ THREE.FileLoader.prototype.load = (url, onLoad, onProgress, onError) => {
 global.window = {
     addEventListener: function() {},
     removeEventListener: function() {},
-    isHeadless: true
+    isHeadless: true,
 };
 global.XMLHttpRequest = XMLHttpRequest;
 
@@ -39,7 +40,7 @@ var PNG = require('pngjs').PNG;
 var gl = require("headless-gl")(512, 512);
 var width = 600;
 var height = 400;
-var path = 'output.png';
+var outputPath = 'output.png';
 var png = new PNG({width: width, height: height});
 
 var scene = new THREE.Scene();
@@ -89,38 +90,50 @@ function testScene() {
     renderer.render(scene, camera, rtTexture, true);
 }
 
+function filePathToLocalUrl(filename) {
+    let relativePath = path.relative(path.resolve(__dirname, ".."), filename);
+    relativePath = relativePath.replace("\\", "/");
+    return relativePath;
+}
 
-require("../js/modelviewer").start(renderer, rtTexture, function() {
-    console.log("in callback");
+if (require.main === module) {
+    const filename = path.resolve(process.argv[2]);
+    if (!fs.existsSync(filename))
+        throw new Error("not found: " + filename);
+    global.window.modelUrl = filePathToLocalUrl(filename);
 
-    var glLocal = renderer.getContext();
-    var pixels = new Uint8Array(4 * width * height);
+    require("../js/modelviewer").start(renderer, rtTexture, function() {
+        console.log("in callback");
 
-    glLocal.readPixels(0, 0, width, height, glLocal.RGBA, glLocal.UNSIGNED_BYTE, pixels);
+        var glLocal = renderer.getContext();
+        var pixels = new Uint8Array(4 * width * height);
 
-    var j, l, i, n, k, ref, ref1;
+        glLocal.readPixels(0, 0, width, height, glLocal.RGBA, glLocal.UNSIGNED_BYTE, pixels);
 
-    for (j = l = 0, ref = height; 0 <= ref ? l < ref : l > ref; j = 0 <= ref ? ++l : --l) {
-        for (i = n = 0, ref1 = width; 0 <= ref1 ? n < ref1 : n > ref1; i = 0 <= ref1 ? ++n : --n) {
-            k = j * width + i;
-            var r = pixels[4 * k];
-            var g = pixels[4 * k + 1];
-            var b = pixels[4 * k + 2];
-            var a = pixels[4 * k + 3];
-            var m = (height - j + 1) * width + i;
-            png.data[4 * m] = r;
-            png.data[4 * m + 1] = g;
-            png.data[4 * m + 2] = b;
-            png.data[4 * m + 3] = a;
+        var j, l, i, n, k, ref, ref1;
+
+        for (j = l = 0, ref = height; 0 <= ref ? l < ref : l > ref; j = 0 <= ref ? ++l : --l) {
+            for (i = n = 0, ref1 = width; 0 <= ref1 ? n < ref1 : n > ref1; i = 0 <= ref1 ? ++n : --n) {
+                k = j * width + i;
+                var r = pixels[4 * k];
+                var g = pixels[4 * k + 1];
+                var b = pixels[4 * k + 2];
+                var a = pixels[4 * k + 3];
+                var m = (height - j + 1) * width + i;
+                png.data[4 * m] = r;
+                png.data[4 * m + 1] = g;
+                png.data[4 * m + 2] = b;
+                png.data[4 * m + 3] = a;
+            }
         }
-    }
 
-    var stream = fs.createWriteStream(path);
-    png.pack().pipe(stream);
-    stream.on('close', function() {
-        return console.log("Image written: " + path);
+        var stream = fs.createWriteStream(outputPath);
+        png.pack().pipe(stream);
+        stream.on('close', function() {
+            return console.log("Image written: " + outputPath);
+        });
+
     });
 
-});
 
-
+}

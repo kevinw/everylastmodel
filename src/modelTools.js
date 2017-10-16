@@ -17,7 +17,7 @@ function replaceExtension(filename, newExt) {
 
 assert.equal(replaceExtension("baz/foo.bar", "meep"), path.join("baz", "foo.meep"));
 
-module.exports.getModel = function getModel(searchTerm, cb)
+var getModel = module.exports.getModel = function getModel(searchTerm, cb)
 {
     turbosquid.download(searchTerm, function(err, filename) {
         if (err) return cb(err);
@@ -236,11 +236,21 @@ unrar x -y -r - .downloaded\370zfbx.rar
 }
 
 if (require.main === module) {
-    const file = path.resolve(process.argv[2]);
-    if (!fs.existsSync(file))
-        throw new Error("file not found: " + file);
-    afterDownload(file, function(err, res) {
-        if (err) console.error(err.stack);
-        console.log(res);
-    });
+    var verb = process.argv[2];
+    if (verb === "file")
+    {
+        const file = path.resolve(process.argv[3]);
+        if (!fs.existsSync(file))
+            throw new Error("file not found: " + file);
+        afterDownload(file, function(err, res) {
+            if (err) console.error(err.stack);
+            console.log(res);
+        });
+    } else if (verb === "search") {
+        const term = process.argv[3];
+        getModel(term, function(err, result) {
+            if (err) { console.error(err); console.error(err.stack); } 
+            else console.log(result);
+        });
+    }
 }

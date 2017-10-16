@@ -1,11 +1,10 @@
 var text = "test headless";
 
-var modelUrl = "/.downloaded/cartDog.obj";
-
 var THREE = window.THREE || {};
 
 text = window.displayText || "Foobar";
-modelUrl = window.modelUrl || modelUrl;
+var MODEL_URL = window.modelUrl || "/.downloaded/cartDog.obj";
+console.log("MODEL_URL", MODEL_URL);
 
 var textGeo;
 var textMesh1, textMesh2;
@@ -254,7 +253,7 @@ function start(givenRenderer, rtTexture, cb) {
         }
     }
 
-    loadAnyModel(modelUrl, function(obj) {
+    loadAnyModel(MODEL_URL, function(obj) {
         scene.add(obj);
 
         var textSize = measureSize(textGroup);

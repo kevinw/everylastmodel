@@ -1,11 +1,8 @@
-var text = "test headless";
-
-var THREE = window.THREE || {};
-
-text = window.displayText || "Foobar";
+var text = window.displayText || "Foobar";
 var MODEL_URL = window.modelUrl || "/.downloaded/cartDog.obj";
 console.log("MODEL_URL", MODEL_URL);
 
+var THREE = window.THREE || {};
 var textGeo;
 var textMesh1, textMesh2;
 
@@ -284,13 +281,7 @@ function start(givenRenderer, rtTexture, cb) {
 }
 
 if (!window.isHeadless)
-{
-    console.log("NOT HEADLESS, STARTING");
     start();
-}
 else
-{
-    console.log("HEADLESS, exporting start");
     module.exports.start = start;
-}
 

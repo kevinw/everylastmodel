@@ -71,31 +71,13 @@ var rtTexture = new THREE.WebGLRenderTarget(width, height, {
     format: THREE.RGBAFormat
 });
 
-function testScene() {
-    var geometry = new THREE.BoxGeometry(1, 1, 1);
-    var material = new THREE.ShaderMaterial();
-    var vec4 = new THREE.Vector4(1.0, 0.0, 0.0, 1.0);
-    material.vertexShader = 'void main() {\n    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );\n}';
-    material.fragmentShader = 'uniform vec4 solidColor;\n\nvoid main() {\n    gl_FragColor = solidColor;\n}';
-    material.uniforms = {
-        solidColor: {
-            type: "v4",
-            value: vec4
-        }
-    };
-
-    var cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
-    renderer.render(scene, camera, rtTexture, true);
-}
-
 function filePathToLocalUrl(filename) {
     let relativePath = path.relative(path.resolve(__dirname, ".."), filename);
     relativePath = relativePath.replace("\\", "/");
     return relativePath;
 }
 
-const renderModelFile = module.exports.renderModelFile = function renderModelFile(filename, outputPath, cb) {
+const renderModelFile = module.exports.renderModelFile = function renderModelFile(filename, outputPath, displayText, cb) {
     filename = path.resolve(filename);
     if (!fs.existsSync(filename))
         throw new Error("not found: " + filename);
@@ -106,6 +88,7 @@ const renderModelFile = module.exports.renderModelFile = function renderModelFil
         mkdirsSync(outputDir);
 
     global.window.modelUrl = filePathToLocalUrl(filename);
+    global.window.displayText = displayText;
 
     require("../js/modelviewer").start(renderer, rtTexture, function() {
         console.log("in callback");

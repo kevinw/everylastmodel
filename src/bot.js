@@ -3,7 +3,7 @@ var fs = require("fs");
 var config = require("../.twitter_secrets.js");
 var T = new twit(config);
 
-function tweetImageFile(imageFile) {
+function tweetImageFile(text, imageFile) {
     var b64content = fs.readFileSync(imageFile, { encoding: 'base64' });
 
     // first we must post the media to Twitter
@@ -21,7 +21,7 @@ function tweetImageFile(imageFile) {
                 console.error(err);
             else {
                 // now we can reference the media and post a tweet (media will attach to the tweet)
-                var params = { status: '', media_ids: [mediaIdStr] };
+                var params = { status: text, media_ids: [mediaIdStr] };
 
                 T.post('statuses/update', params, function (err, data, _response) {
                     if (err)

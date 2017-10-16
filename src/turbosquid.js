@@ -72,7 +72,15 @@ function download(term, cb) {
             }
             else
             {
-                const resultDivs = $("#SearchResultAssets > div");
+                const resultDivs = $("#SearchResultAssets > div").filter((_idx, el) => {
+                    // peek at this model's available file formats and discard
+                    // it if we don't know any of them
+                    const formats = $(el).find(".formatInfo").text().split(" ").map((s) => s.trim());
+                    for (const f of formats)
+                        if (allowedFormats.indexOf(f) !== -1)
+                            return true;
+                    return false;
+                });
                 const nth = Math.floor(Math.random() * resultDivs.length);
                 const randomResult = resultDivs[nth];
                 console.log(`picked result ${nth} from ${resultDivs.length}`);

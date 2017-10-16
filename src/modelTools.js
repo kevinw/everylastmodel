@@ -61,7 +61,7 @@ function afterDownload(name, cb) {
         // otherwise convert it
         const outputFile = replaceExtension(file, "json");
         console.log("converting to JSON");
-        if (file.endsWith('.fbx'))
+        if (file.toLowerCase().endsWith('.fbx'))
         {
             const upgradedFile = path.join(path.dirname(file), path.basename(file) + "2.fbx");
             child_process.execFile(path.resolve('tools','win','FbxConverter.exe'), [file, upgradedFile], function (err, stdout, stderr) {
@@ -250,7 +250,10 @@ if (require.main === module) {
         const term = process.argv[3];
         getModel(term, function(err, result) {
             if (err) { console.error(err); console.error(err.stack); } 
-            else console.log(result);
+            else {
+                console.log(result);
+                process.exit(0)
+            }
         });
     }
 }

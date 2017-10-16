@@ -45,13 +45,20 @@ function ensureLoggedIn(cb) {
     });
 }
 
+function followRedirect(_resp) {
+    //console.log("REDIRECT", resp);
+    return true;
+}
+
 function download(term, cb) {
     ensureLoggedIn(function() {
         const searchUrl = util.format(SEARCH_URL, term);
         console.log("opening " + searchUrl);
-        request(searchUrl, function (err, response, html) {
+        request({url: searchUrl, followRedirect}, function (err, response, html) {
             fs.writeFileSync("output.html", html);
             if (err) return cb(err);
+            if (html.indexOf("Sorry, no results were found for your search.") !== -1)
+                return cb(new Error(`no turbosquid results for ${term}`));
             const $ = cheerio.load(html);
             let idStr;
             if ($("body").attr("id") === "FullPreview")
@@ -66,7 +73,9 @@ function download(term, cb) {
             else
             {
                 const resultDivs = $("#SearchResultAssets > div");
-                const randomResult = resultDivs[Math.floor(Math.random() * resultDivs.length)];
+                const nth = Math.floor(Math.random() * resultDivs.length);
+                const randomResult = resultDivs[nth];
+                console.log(`picked result ${nth} from ${resultDivs.length}`);
                 idStr = randomResult.attribs.id;
                 if (!idStr || idStr.substr(0, 5) !== "Asset")
                     return cb(new Error("expected id to be AssetXXX:\n\n" + util.inspect(randomResult)));
@@ -88,7 +97,11 @@ function download(term, cb) {
 
                 console.log("got " + html.length + " bytes response");
 
-                const productJSON = html.match(/purchasedProductFileJSON = (.*);/)[1];
+                const match = html.match(/purchasedProductFileJSON = (.*);/);
+                if (!match)
+                    return cb(new Error("no products json in result page"));
+
+                const productJSON = match[1];
                 if (!productJSON)
                     return cb(new Error("expected purchasedProductFileJSON in result"));
 
@@ -124,7 +137,7 @@ function download(term, cb) {
                 }
 
                 if (!didRequest)
-                    return cb(new Error("no matching product_ids"));
+                    return cb(new Error("no matching product_ids:\n\n" + util.inspect(products)));
             });
         });
     });

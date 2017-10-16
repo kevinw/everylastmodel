@@ -96,8 +96,8 @@ function filePathToLocalUrl(filename) {
     return relativePath;
 }
 
-if (require.main === module) {
-    const filename = path.resolve(process.argv[2]);
+const renderModelFile = module.exports.renderModelFile = function renderModelFile(filename, cb) {
+    filename = path.resolve(filename);
     if (!fs.existsSync(filename))
         throw new Error("not found: " + filename);
     global.window.modelUrl = filePathToLocalUrl(filename);
@@ -130,10 +130,13 @@ if (require.main === module) {
         var stream = fs.createWriteStream(outputPath);
         png.pack().pipe(stream);
         stream.on('close', function() {
-            return console.log("Image written: " + outputPath);
+            console.log("Image written: " + outputPath);
+            if (cb) cb(null, outputPath);
         });
 
     });
+};
 
-
+if (require.main === module) {
+    renderModelFile(process.argv[2]);
 }

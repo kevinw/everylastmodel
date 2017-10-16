@@ -40,7 +40,6 @@ var PNG = require('pngjs').PNG;
 var gl = require("headless-gl")(512, 512);
 var width = 600;
 var height = 400;
-var outputPath = 'output.png';
 var png = new PNG({width: width, height: height});
 
 var scene = new THREE.Scene();
@@ -96,10 +95,16 @@ function filePathToLocalUrl(filename) {
     return relativePath;
 }
 
-const renderModelFile = module.exports.renderModelFile = function renderModelFile(filename, cb) {
+const renderModelFile = module.exports.renderModelFile = function renderModelFile(filename, outputPath, cb) {
     filename = path.resolve(filename);
     if (!fs.existsSync(filename))
         throw new Error("not found: " + filename);
+
+    const outputFile = path.resolve(outputPath);
+    const outputDir = path.dirname(outputFile);
+    if (!fs.existsSync(outputDir))
+        mkdirsSync(outputDir);
+
     global.window.modelUrl = filePathToLocalUrl(filename);
 
     require("../js/modelviewer").start(renderer, rtTexture, function() {
@@ -127,7 +132,7 @@ const renderModelFile = module.exports.renderModelFile = function renderModelFil
             }
         }
 
-        var stream = fs.createWriteStream(outputPath);
+        const stream = fs.createWriteStream(outputPath);
         png.pack().pipe(stream);
         stream.on('close', function() {
             console.log("Image written: " + outputPath);
@@ -137,6 +142,20 @@ const renderModelFile = module.exports.renderModelFile = function renderModelFil
     });
 };
 
+function mkdirsSync(targetDir)
+{
+    const fs = require('fs');
+    const path = require('path');
+    const sep = path.sep;
+    const initDir = path.isAbsolute(targetDir) ? sep : '';
+    targetDir.split(sep).reduce((parentDir, childDir) => {
+        const curDir = path.resolve(parentDir, childDir);
+        if (!fs.existsSync(curDir))
+            fs.mkdirSync(curDir);
+        return curDir;
+    }, initDir);
+}
+
 if (require.main === module) {
-    renderModelFile(process.argv[2]);
+    renderModelFile(process.argv[2], process.argv[3]);
 }

@@ -95,22 +95,6 @@ function afterDownload(name, cb) {
     });
 }
 
-/*
-function mkdirs(targetDir)
-{
-    const fs = require('fs');
-    const path = require('path');
-    const sep = path.sep;
-    const initDir = path.isAbsolute(targetDir) ? sep : '';
-    targetDir.split(sep).reduce((parentDir, childDir) => {
-        const curDir = path.resolve(parentDir, childDir);
-        if (!fs.existsSync(curDir))
-            fs.mkdirSync(curDir);
-        return curDir;
-    }, initDir);
-}
-*/
-
 function isArchive(filename) {
     const f = filename.toLowerCase();
     for (const ext of [".zip", ".rar", ".7z"])
@@ -143,96 +127,6 @@ function extractModel(name, cb) {
             })
                 .catch(err => cb(err));
         }).catch(err => cb(err));
-
-    /*
-    if (nameLower.endsWith(".zip")) {
-        console.log("unzipping", name);
-        fs.createReadStream(name)
-            .pipe(unzip.Parse())
-            .on('entry', function (entry) {
-                if (entry.type !== "File")
-                    return entry.autodrain();
-
-                //console.log(util.inspect(entry));
-                const fileName = entry.path;
-                const absPath = path.resolve(extractTo, fileName);
-                const dirname = path.dirname(absPath);
-                mkdirs(dirname);
-                const stat = fs.lstatSync(dirname);
-                if (!stat.isDirectory())
-                    return cb(new Error("expected a directory, but something else: " + dirname));
-                const writePipe = fs.createWriteStream(absPath);
-                entry.pipe(writePipe);
-                results.push(absPath);
-            })
-            .on('close', function() {
-                cb(null, results);
-            });
-    }
-    else if (nameLower.endsWith(".rar")) {
-        child_process.execFile("unrar", ['x', '-y', '-r', name], function(err, stdout, stderr) {
-            for (let line of stdout.split("\n")) {
-                line = line.replace('\r', '').replace('\n', '');
-                if (line.startsWith("Extracting from") || line.length === 0)
-                    continue;
-                if (!line.startsWith("Extracting"))
-                    continue;
-                console.log(line);
-                const match = line.match(/Extracting\s(.*)\sOK/);
-                if (!match)
-                    return cb(new Error("no match for " + line));
-                console.log(match[1]);
-
-            }
-            console.error("----stderr----");
-            console.error(stderr);
-            console.error("----endstderr----");
-        });
-        */
-    /*
-unrar x -y -r - .downloaded\370zfbx.rar
-        const extractor = unrar.createExtractorFromFile(name, extractTo);
-        const list = extractor.getFileList();
-        const results = [];
-        if (list[0].state !== "SUCCESS")
-            return cb(new Error(list[0].state));
-
-        for (const {name} of list[1].fileHeaders)
-            if (isModelFile(name))
-                results.push(path.resolve(extractTo, name));
-
-        const list2 = extractor.extractAll();
-        if (list2[0].state !== "SUCCESS")
-            return cb(new Error(list2[0].state));
-
-        for (const file of list2[1].files)
-        {
-            const name = file.fileHeader.name;
-            const extract = file.extract[1];
-            console.log(name, extract);
-        }
-
-        cb(null, results);
-        */
-
-    /*
-        new unrar(name).extract(extractTo, null, function(err, res) {
-            if (err)
-                return cb(err);
-            console.log("UNRAR RESULTS", res);
-            cb(null, res);
-        });
-        */
-    /*
-        console.log(`unrar-ing ${name} to ${extractTo}`);
-        unrar.extract(name, {dest: extractTo}).then(({_name, files}) => {
-            for (const filename of files)
-                console.log(`  file: ${filename}`);
-            cb(null, files);
-        }).catch((err) => {
-            cb(err);
-        });
-        */
 }
 
 if (require.main === module) {
@@ -252,7 +146,7 @@ if (require.main === module) {
             if (err) { console.error(err); console.error(err.stack); } 
             else {
                 console.log(result);
-                process.exit(0)
+                process.exit(0);
             }
         });
     }

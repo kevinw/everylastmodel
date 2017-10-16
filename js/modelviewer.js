@@ -18,9 +18,9 @@ function loadFont() {
 }
 
 function refreshText() {
-    textGroup.remove( textMesh1 );
-    if ( mirror ) textGroup.remove( textMesh2 );
-    if ( !text ) return;
+    textGroup.remove(textMesh1);
+    if (mirror) textGroup.remove( textMesh2 );
+    if (!text) return;
     createText();
 }
 
@@ -106,10 +106,15 @@ const h = (400)*F;
 var scene = new THREE.Scene();
 var camera;
 
-var light = new THREE.HemisphereLight( 0xffffbb, 0x080820, .8 );
+const skyColor = new THREE.Color();
+const groundColor = new THREE.Color();
+skyColor.setHSL( Math.random(), 1 - (Math.random() * .2), 0.5 );
+groundColor.setHSL( Math.random(), 1 - (Math.random() * .2), 0.5 );
+
+var light = new THREE.HemisphereLight(skyColor, groundColor, .7 );
 scene.add( light );
 
-var intensity = 0.7;
+var intensity = 0.3;
 var directionalLight = new THREE.DirectionalLight( 0xffffff, intensity );
 directionalLight.position.set( 3, 1, 3 );
 directionalLight.rotation.set(.3, .4, 0);
@@ -242,6 +247,7 @@ function start(givenRenderer, rtTexture, cb) {
     var aspect = 1;
     camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
 
+    renderer.setClearColor(new THREE.Color(0, 0, 0), 1);
     function render() {
         if (!window.isHeadless) requestAnimationFrame(render);
         renderer.clear();

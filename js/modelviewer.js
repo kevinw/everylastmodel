@@ -256,6 +256,11 @@ function start(givenRenderer, rtTexture, cb) {
         }
     }
 
+    const loadAllResources = () => new Promise((resolve, reject) => {
+        THREE.DefaultLoadingManager.onLoad = resolve;
+        THREE.DefaultLoadingManager.onError = reject;
+    });
+
     loadAnyModel(MODEL_URL, function(obj) {
         scene.add(obj);
 
@@ -276,7 +281,7 @@ function start(givenRenderer, rtTexture, cb) {
             controls.addEventListener("change", render); // remove when using animation loop
         }
 
-        render();
+        loadAllResources().then(render);
     });
 }
 

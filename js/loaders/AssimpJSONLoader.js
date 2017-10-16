@@ -252,6 +252,7 @@ THREE.AssimpJSONLoader.prototype = {
 
 		}
 
+
 		var textureLoader = new THREE.TextureLoader( this.manager );
 		textureLoader.setPath( path ).setCrossOrigin( this.crossOrigin );
 

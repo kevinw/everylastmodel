@@ -3,6 +3,7 @@ const child_process = require("child_process");
 const path = require("path");
 const turbosquid = require("./turbosquid");
 const assert = require("assert");
+const {isModelFile} = require("./common");
 
 const ASSIMP_EXEC = require("../.localconfig.json").assimp2json.win;
 if (!ASSIMP_EXEC) throw new Error("Must set ASSIMP_EXEC in .localconfig.json");
@@ -17,20 +18,12 @@ function replaceExtension(filename, newExt) {
 
 assert.equal(replaceExtension("baz/foo.bar", "meep"), path.join("baz", "foo.meep"));
 
-var getModel = module.exports.getModel = function getModel(searchTerm, cb)
-{
+var getModel = module.exports.getModel = function getModel(searchTerm, cb) {
     turbosquid.download(searchTerm, function(err, filename) {
         if (err) return cb(err);
         afterDownload(filename, cb);
     });
 };
-
-function isModelFile(file) {
-    for (const ext of turbosquid.allowedFormats)
-        if (file.toLowerCase().endsWith(ext))
-            return true;
-    return false;
-}
 
 function pickModelFile(files) {
     for (const file of files)
@@ -63,6 +56,7 @@ function afterDownload(name, cb) {
         console.log("converting to JSON");
         if (file.toLowerCase().endsWith('.fbx'))
         {
+            // FBX files need to be upgraded before being passed to assimp2json.
             const upgradedFile = path.join(path.dirname(file), path.basename(file) + "2.fbx");
             child_process.execFile(path.resolve('tools','win','FbxConverter.exe'), [file, upgradedFile], function (err, stdout, stderr) {
                 if (err)

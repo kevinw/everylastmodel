@@ -3,21 +3,13 @@ const path = require("path");
 const request = require("request").defaults({jar: true});
 const util = require("util");
 const fs = require("fs");
+const {allowedFormats} = require("./common");
 
 const DOMAIN = "https://www.turbosquid.com/";
 const LOGIN_URL = DOMAIN + "Login/Index.cfm";
 const SEARCH_URL = DOMAIN + "3d-model/%s?max_price=0&min_price=0";
 const DOWNLOAD_URL = DOMAIN + "AssetManager/Index.cfm?stgAction=getFiles&subAction=Download&intID=%s&intType=3";
 const FILE_URL = "https://storage9.turbosquid.com/Download/index.php?ID=%s_%s";
-
-const allowedFormats = ["fbx", "dae", "gltf", "glb", "blend", "3ds", "ase",
-    "obj", "ifc", "xgl", "zgl", "ply", "dxf", "lwo", "lws",
-    "lxo", "stl", "x", "ac", "ms3d", "cob", "scn", "ogex",
-    "x3d", "3mf", "bvh", "csm", "xml", "irrmesh", "irr",
-    "mdl", "md2", "md3", "pk3", "mdc", "md5", "smd", "vta",
-    "ogex", "3d", "b3d", "q3d", "q3s", "nff", "nff", "off",
-    "raw", "ter", "mdl", "hmp", "ndo"
-];
 
 function ensureLoggedIn(cb) {
     if (!process.env.TURBOSQUID_USERNAME || !process.env.TURBOSQUID_PASSWORD)

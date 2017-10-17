@@ -27,6 +27,7 @@
     },
     "devDependencies": {
         "express": "^4.16.2",
+        "filesize": "^3.5.10",
         "http-server": "^0.10.0",
         "prettier": "1.7.4",
         "request-progress": "^3.0.0"

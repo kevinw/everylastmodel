@@ -80,6 +80,9 @@ function createText() {
   textMesh1.rotation.x = 0;
   textMesh1.rotation.y = Math.PI * 2;
 
+  textMesh1.rotation.x = Math.random() * .3;
+  textMesh1.rotation.z = Math.random() * .3;
+
   textGroup.add(textMesh1);
 
   if (mirror) {

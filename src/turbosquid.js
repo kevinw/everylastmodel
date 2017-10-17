@@ -118,7 +118,9 @@ function download(term, cb) {
 
                         const fileUrl = util.format(FILE_URL, id, file.FILEITEMID);
 
-                        const modelsDirectory = path.resolve(__dirname, "..", ".downloaded");
+                        const modelsDirectory = process.pkg ? 
+                            path.resolve(process.cwd(), ".downloaded") :
+                            path.resolve(__dirname, "..", ".downloaded");
                         if (!fs.existsSync(modelsDirectory))
                             fs.mkdirSync(modelsDirectory);
                         const name = path.resolve(modelsDirectory, file.NAME);

@@ -1,6 +1,5 @@
 var text = window.displayText || "Foobar";
 var MODEL_URL = window.modelUrl || "/.downloaded/cartDog.obj";
-console.log("MODEL_URL", MODEL_URL);
 
 var THREE = window.THREE || {};
 var textGeo;
@@ -41,14 +40,10 @@ function createText() {
     // "fix" side normals by removing z-component of normals for side faces
     // (this doesn't work well for beveled geometry as then we lose nice curvature around z-axis)
 
-    if ( ! bevelEnabled ) {
-
-        var triangleAreaHeuristics = 0.1 * ( height * size );
-
+    if (!bevelEnabled) {
+        const triangleAreaHeuristics = 0.1 * ( height * size );
         for ( var i = 0; i < textGeo.faces.length; i ++ ) {
-
-            var face = textGeo.faces[ i ];
-
+            const face = textGeo.faces[i];
             if (face.materialIndex === 1) {
 
                 for (var j = 0; j < face.vertexNormals.length; j++) {
@@ -236,7 +231,7 @@ function start(givenRenderer, rtTexture, cb) {
         renderer = new THREE.WebGLRenderer({ });
         renderer.setSize(w, h);
         document.body.appendChild(renderer.domElement);
-        var style = renderer.domElement.style;
+        const style = renderer.domElement.style;
         style.width = Math.floor(w/F) + "px";
         style.height = Math.floor(h/F) + "px";
     }
@@ -264,12 +259,12 @@ function start(givenRenderer, rtTexture, cb) {
     loadAnyModel(MODEL_URL, function(obj) {
         scene.add(obj);
 
-        var textSize = measureSize(textGroup);
-        var objCenter = getObject3DCenter(obj);
+        const textSize = measureSize(textGroup);
+        const objCenter = getObject3DCenter(obj);
         obj.position.sub(objCenter);
-        var objSize = measureSize(obj);
+        const objSize = measureSize(obj);
 
-        var factor = textSize.x  / objSize.x;
+        const factor = textSize.x  / objSize.x;
         console.log(factor);
         textGroup.scale.set(1/factor, 1/factor, 1/factor);
 
@@ -277,7 +272,7 @@ function start(givenRenderer, rtTexture, cb) {
 
         if (!window.isHeadless)
         {
-            var controls = new THREE.OrbitControls( camera, renderer.domElement );
+            var controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.addEventListener("change", render); // remove when using animation loop
         }
 

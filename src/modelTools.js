@@ -18,10 +18,10 @@ function replaceExtension(filename, newExt) {
 
 assert.equal(replaceExtension("baz/foo.bar", "meep"), path.join("baz", "foo.meep"));
 
-var getModel = module.exports.getModel = function getModel(searchTerm, cb) {
+var getModel = module.exports.getModel = function getModel(searchTerm, cb, convertToJSON=true) {
     turbosquid.download(searchTerm, function(err, filename) {
         if (err) return cb(err);
-        afterDownload(filename, cb);
+        afterDownload(filename, cb, convertToJSON);
     });
 };
 
@@ -31,25 +31,32 @@ function pickModelFile(files) {
             return file;
 }
 
-function afterDownload(name, cb) {
+function afterDownload(name, cb, convertToJSON = true) {
 
     extractModel(name, function(err, files) {
         if (err) return cb(err);
+
+        console.log("after extractModel");
+        console.log("err", err);
+        console.log("files", files);
 
         // pick which file out of the zip to use
         const file = pickModelFile(files);
         if (!file) return cb(new Error("no model found in: " + files.join(", ")));
 
         // transform the model into our common format
-        console.log("found model " + file);
+        //console.log("found model " + file);
 
         // just return the original model if it's in a format we can show natively
         for (const loaderExt of loaders)
             if (file.toLowerCase().endsWith(loaderExt))
             {
-                console.log("using " + file);
+                //console.log("using " + file);
                 return cb(null, file);
             }
+
+        if (!convertToJSON)
+            return cb(null, file);
 
         // otherwise convert it
         const outputFile = replaceExtension(file, "json");
@@ -124,24 +131,14 @@ function extractModel(name, cb) {
 }
 
 if (require.main === module) {
-    var verb = process.argv[2];
-    if (verb === "file")
-    {
-        const file = path.resolve(process.argv[3]);
-        if (!fs.existsSync(file))
-            throw new Error("file not found: " + file);
-        afterDownload(file, function(err, res) {
-            if (err) console.error(err.stack);
-            console.log(res);
-        });
-    } else if (verb === "search") {
-        const term = process.argv[3];
-        getModel(term, function(err, result) {
-            if (err) { console.error(err); console.error(err.stack); } 
-            else {
-                console.log(result);
-                process.exit(0);
-            }
-        });
-    }
+    const term = process.argv[2];
+    getModel(term, function(err, result) {
+        if (err) {
+            console.error(err);
+            console.error(err.stack);
+        } else {
+            console.log(result);
+            process.exit(0);
+        }
+    }, false);
 }

@@ -1,3 +1,0 @@
-(A) add free3d.com support
-(A) add movie export
-(B) change package.json license

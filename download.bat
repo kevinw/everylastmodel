@@ -1,1 +1,2 @@
-node src\modelTools.js search %1 || exit /b 666
+@echo off
+node src\modelTools.js %1 || exit /b 666

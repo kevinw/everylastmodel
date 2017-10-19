@@ -6,7 +6,7 @@ const getModel = require("./modelTools").getModel;
 const renderModelFile = require("./headless").renderModelFile;
 const bot = require("./bot");
 
-function searchRenderAndTween(term) {
+function searchRenderAndTweet(term) {
   getModel(term, function(err, modelInfo) {
     if (err)
       return console.error(err);
@@ -34,5 +34,5 @@ function searchRenderAndTween(term) {
 if (require.main === module) {
   const term = process.argv.length < 3 ? generate.randomThing() : process.argv[2];
   console.log("finding '" + term + "'");
-  searchRenderAndTween(term);
+  searchRenderAndTweet(term);
 }

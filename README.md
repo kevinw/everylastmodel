@@ -1,3 +1,6 @@
-# to run devserver
+A silly twitter bot.
 
-nodemon run src/server
+```
+npm install
+tweet.bat
+```

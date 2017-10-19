@@ -8,7 +8,8 @@ const bot = require("./bot");
 
 function searchRenderAndTween(term) {
   getModel(term, function(err, modelInfo) {
-    if (err) throw err;
+    if (err)
+      return console.error(err);
 
     console.assert(typeof modelInfo.filename === "string");
 
@@ -20,7 +21,8 @@ function searchRenderAndTween(term) {
       err,
       imageFile
     ) {
-      if (err) throw err;
+      if (err)
+        return console.error(err);
       bot.tweetImageFile(modelInfo.url, imageFile, function(err, result) {
         if (err) throw err;
         console.log(result);
@@ -30,7 +32,7 @@ function searchRenderAndTween(term) {
 }
 
 if (require.main === module) {
-  const term =
-    process.argv.length < 3 ? generate.randomThing() : process.argv[2];
+  const term = process.argv.length < 3 ? generate.randomThing() : process.argv[2];
+  console.log("finding '" + term + "'");
   searchRenderAndTween(term);
 }

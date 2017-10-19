@@ -214,7 +214,7 @@ const renderModelFile = (module.exports.renderModelFile = function renderModelFi
     const stream = fs.createWriteStream(outputPath);
     png.pack().pipe(stream);
     stream.on("close", function() {
-      console.log("Image written: " + outputPath);
+      //console.log("Image written: " + outputPath);
       if (cb) cb(null, outputPath);
     });
   });

@@ -198,9 +198,7 @@ function fitCameraToObj(camera, obj) {
   {
     const color = 0xffffff;
     const intensity = 1.3;
-    const distance = Math.max(size.x, size.y, size.z);
-    const decay = 1.5;
-    const light = new THREE.DirectionalLight(color, intensity);//THREE.PointLight(color, intensity, distance, decay);
+    const light = new THREE.DirectionalLight(color, intensity);
     light.position.set(size.x/2, size.y/2, size.z/2);
     light.castShadow = true;
     scene.add(light);
@@ -241,32 +239,9 @@ function fitCameraToObj(camera, obj) {
   return size;
 }
 
-/*
-function getCenterPoint(mesh) {
-  const center = getBoundingBox(mesh).getCenter();
-  mesh.localToWorld(center);
-  return center;
-}
-*/
-
 function getObject3DCenter(obj3d) {
   return new THREE.Box3().expandByObject(obj3d).getCenter();
 }
-
-/*
-function getObject3DCenterOld(obj3d) {
-  const center = new THREE.Vector3();
-  let length = 0;
-  obj3d.traverse(function(o) {
-    if (o.geometry) {
-      center.add(getCenterPoint(o));
-      length++;
-    }
-  });
-  center.divideScalar(length);
-  return center;
-}
-*/
 
 let renderer;
 
@@ -283,58 +258,6 @@ function loadAnyModel(path, cb) {
   loader.load(path, cb, null, err);
 }
 
-/*
-function fitAll(root) {
-  const geos = [];
-  root.traverse((o) => {
-    if (o.geometry)
-      geos.push(o.geometry);
-  });
-
-  // Compute world AABB and radius (approx: better compute BB be in camera space)
-  var aabbMin = new THREE.Vector3();
-  var aabbMax = new THREE.Vector3();
-  for (const geo of geos) {
-    const box = getBoundingBox(geo);
-    aabbMin.x = Math.min(aabbMin.x, box.min.x);
-    aabbMin.y = Math.min(aabbMin.y, box.min.y);
-    aabbMin.z = Math.min(aabbMin.z, box.min.z);
-    aabbMax.x = Math.max(aabbMax.x, box.max.x);
-    aabbMax.y = Math.max(aabbMax.y, box.max.y);
-    aabbMax.z = Math.max(aabbMax.z, box.max.z);
-  }
-
-  // Compute world AABB center
-  var aabbCenter = new THREE.Vector3();
-  aabbCenter.x = (aabbMax.x + aabbMin.x) * 0.5;
-  aabbCenter.y = (aabbMax.y + aabbMin.y) * 0.5;
-  aabbCenter.z = (aabbMax.z + aabbMin.z) * 0.5;
-
-  // Compute world AABB "radius" (approx: better if BB height)
-  var diag = new THREE.Vector3();
-  diag = diag.subVectors(aabbMax, aabbMin);
-  const radius = diag.length() * 0.5;
-
-  // Compute offset needed to move the camera back that much needed to center AABB (approx: better if from BB front face)
-  const offset = radius / Math.tan(Math.PI / 180.0 * camera.fov * 0.5);
-
-  // Compute new camera position
-  const dir = new THREE.Vector3(
-    camera.matrix.elements[8],
-    camera.matrix.elements[9],
-    camera.matrix.elements[10]);
-  dir.multiplyScalar(offset);
-  const newPos = new THREE.Vector3();
-  newPos.addVectors(aabbCenter, dir);
-
-  // Update camera (ugly hack to reset THREE.TrackballControls)
-  camera.position.set(newPos.x, newPos.y, newPos.z);
-  camera.lookAt(aabbCenter);
-
-  return aabbCenter;
-}
-*/
-
 function sortComponents(v) {
   const x = [v.x, 'x'];
   const y = [v.y, 'y'];
@@ -345,8 +268,6 @@ function sortComponents(v) {
   els.reverse();
   return els;
 }
-
-function getMajorAxis(v) { return getAxis(v, 0); }
 
 function getAxis(v, n) {
   const els = sortComponents(v);
@@ -428,16 +349,11 @@ function start(givenRenderer, rtTexture, cb) {
 
     const textSize = measureSize(textGroup);
 
-    //const sign = Math.random() < 5 ? -1 : 1;
-
     const factor = textSize.x / objSize.x;
-    console.log(factor);
     textGroup.scale.set(1 / factor, 1 / factor, 1 / factor);
     textGroup.position.y = objSize.y / 10 * 2;
 
     fitCameraToObj(camera, obj);
-    //const center = fitAll(obj);
-  
     //scene.add(new THREE.AxisHelper(10));
 
     if (!window.isHeadless) {

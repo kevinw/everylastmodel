@@ -1,5 +1,7 @@
 A silly twitter bot.
 
+https://twitter.com/everylastmodel
+
 ```
 npm install
 tweet.bat

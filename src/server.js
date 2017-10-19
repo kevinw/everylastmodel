@@ -12,9 +12,29 @@ const generate = require("./generate");
 
 router.use(bodyParser.json());
 
-const {downloadFolder} = require("./common");
+const {downloadFolder, canShowFormats} = require("./common");
 
-function handleFile(req, res, { filename, searchTerm }) {
+const read = (dir) =>
+  fs.readdirSync(dir)
+    .reduce((files, file) =>
+      fs.statSync(path.join(dir, file)).isDirectory() ?
+        files.concat(read(path.join(dir, file))) :
+        files.concat(path.join(dir, file)),
+    []);
+
+
+const pickRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+const getRandomShowableFile = () => {
+  return pickRandom(read(downloadFolder).filter((f) => {
+    for (const canshow of canShowFormats)
+      if (f.endsWith("." + canshow))
+        return true;
+    return false;
+  }));
+};
+
+function handleFile(req, res, { filename, searchTerm, url }) {
   const indexTemplate = fs
     .readFileSync(path.resolve(__dirname, "../index.html"))
     .toString();
@@ -34,6 +54,7 @@ window.displayText = ${util.inspect(searchTerm)};
 <pre>
 search: "${searchTerm}"
 <a href="/file/${filePart}">${filePart}</a> (${humanReadableSize})
+<a href="${url}">turbosquid url</a>
 </pre>`;
 
   const index = indexTemplate
@@ -42,20 +63,26 @@ search: "${searchTerm}"
   res.send(index);
 }
 
+router.get("/file/random", (req, res) => {
+  const filename = path.resolve(getRandomShowableFile());
+  var searchTerm = path.basename(filename, path.extname(filename));
+  handleFile(req, res, {searchTerm, filename, url: ""});
+});
+
 router.get(/\/file\/(.*)/, (req, res) => {
   var param = req.params[0];
   var searchTerm = path.basename(param, path.extname(param));
   var filename = path.resolve(downloadFolder, param);
-  handleFile(req, res, { searchTerm, filename });
+  handleFile(req, res, { searchTerm, filename, url: "" });
 });
 
 function showViewerForSearchTerm(searchTerm, req, res) {
-  modelTools.getModel(searchTerm, function(err, filename) {
+  modelTools.getModel(searchTerm, function(err, {filename, url}) {
     if (err) {
       console.error(err.stack);
       res.status(500).send(util.format("<pre>%s</pre>", err.stack));
     } else {
-      handleFile(req, res, { filename, searchTerm });
+      handleFile(req, res, { filename, searchTerm, url });
     }
   });
 }

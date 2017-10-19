@@ -116,8 +116,8 @@ require("../js/loaders/OBJLoader.js");
 require("../js/loaders/AssimpJSONLoader.js");
 
 const gl = require("headless-gl")(512, 512);
-const width = 600;
-const height = 400;
+const width = 800;
+const height = 800;
 const png = new PNG({width: width, height: height});
 
 const scene = new THREE.Scene();
@@ -129,7 +129,10 @@ scene.add(camera);
 camera.position.set(0, 2, 2);
 camera.lookAt(scene.position);
 
-const canvas = new Object();
+const canvas = {
+  addEventListener: () => undefined,
+  removeEventListener: () => undefined,
+};
 console.assert(gl);
 
 const renderer = new THREE.WebGLRenderer({

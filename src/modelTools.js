@@ -31,9 +31,9 @@ var getModel = (module.exports.getModel = function getModel(
   cb,
   convertToJSON = true
 ) {
-  turbosquid.download(searchTerm, function(err, filename) {
+  turbosquid.download(searchTerm, function(err, modelInfo) {
     if (err) return cb(err);
-    afterDownload(filename, cb, convertToJSON);
+    afterDownload(modelInfo, cb, convertToJSON);
   });
 });
 
@@ -41,7 +41,8 @@ function pickModelFile(files) {
   for (const file of files) if (isModelFile(file)) return file;
 }
 
-function afterDownload(name, cb, convertToJSON = true) {
+function afterDownload(modelInfo, cb, convertToJSON = true) {
+  const name = modelInfo.filename;
   extractModel(name, function(err, files) {
     if (err) return cb(err);
 
@@ -56,7 +57,7 @@ function afterDownload(name, cb, convertToJSON = true) {
     for (const loaderExt of loaders)
       if (file.toLowerCase().endsWith(loaderExt)) {
         //console.log("using " + file);
-        return cb(null, file);
+        return cb(null, {filename: file, url: modelInfo.url});
       }
 
     if (!convertToJSON) return cb(null, file);
@@ -100,7 +101,7 @@ function afterDownload(name, cb, convertToJSON = true) {
           return cb(err);
         }
         console.log("wrote " + outputFile);
-        return cb(null, outputFile);
+        return cb(null, {filename: outputFile, url: modelInfo.url});
       });
     }
   });

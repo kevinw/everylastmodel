@@ -113,9 +113,13 @@ function download(term, cb) {
         return cb(new Error(`no turbosquid results for ${term}`));
       const $ = cheerio.load(html);
       let idStr;
+      let modelCanonicalUrl;
+
+
       if ($("body").attr("id") === "FullPreview") {
         const productId = $("#ProductID");
         idStr = productId.text();
+        modelCanonicalUrl = response.request.href; // TODO: not sure if this is correct.
         if (!idStr) return cb(new Error("expected td#ProductId"));
       } else {
         const parseDivId = (el) => {
@@ -131,6 +135,7 @@ function download(term, cb) {
             .text()
             .split(" ")
             .map(s => s.trim());
+          modelCanonicalUrl = $(el).find("a").attr("href");
           const idStr = parseDivId(el);
           if (!idStr || alreadyDownloadedIds[idStr])
             return false;
@@ -199,7 +204,7 @@ function download(term, cb) {
               })
               .pipe(fs.createWriteStream(name))
               .on("finish", function() {
-                cb(null, name);
+                cb(null, {filename: name, url: modelCanonicalUrl});
               });
 
             break;

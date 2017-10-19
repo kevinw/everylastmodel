@@ -1,5 +1,10 @@
 const downloadFolder = "downloaded";
 
+const canShowFormats = [
+  "json",
+  "obj"
+];
+
 const allowedFormats = [
   "fbx",
   "dae",
@@ -62,6 +67,7 @@ function isModelFile(file) {
   return false;
 }
 
+module.exports.canShowFormats = canShowFormats;
 module.exports.allowedFormats = allowedFormats;
 module.exports.isModelFile = isModelFile;
 module.exports.downloadFolder = downloadFolder;

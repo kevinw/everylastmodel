@@ -7,19 +7,21 @@ const renderModelFile = require("./headless").renderModelFile;
 const bot = require("./bot");
 
 function searchRenderAndTween(term) {
-  getModel(term, function(err, file) {
+  getModel(term, function(err, modelInfo) {
     if (err) throw err;
+
+    console.assert(typeof modelInfo.filename === "string");
 
     const imageFile = path.resolve(
       process.cwd(),
       `.images/${term}_${shortid.generate()}.png`
     );
-    renderModelFile(file, imageFile, generate.randomText(), function(
+    renderModelFile(modelInfo.filename, imageFile, generate.randomText(), function(
       err,
       imageFile
     ) {
       if (err) throw err;
-      bot.tweetImageFile("", imageFile, function(err, result) {
+      bot.tweetImageFile(modelInfo.url, imageFile, function(err, result) {
         if (err) throw err;
         console.log(result);
       });

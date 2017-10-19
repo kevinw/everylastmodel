@@ -1,6 +1,4 @@
-A silly twitter bot.
-
-https://twitter.com/everylastmodel
+A very helpful twitter bot: https://twitter.com/everylastmodel
 
 ```
 npm install

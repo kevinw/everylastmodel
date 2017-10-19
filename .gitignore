@@ -1,4 +1,7 @@
 .images/
+downloaded/
+images/
+modelsLogin.json
 .localconfig.json
 .twitter_secrets.js
 node_modules/

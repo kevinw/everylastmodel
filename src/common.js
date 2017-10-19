@@ -1,3 +1,5 @@
+const downloadFolder = "downloaded";
+
 const allowedFormats = [
   "fbx",
   "dae",
@@ -62,3 +64,4 @@ function isModelFile(file) {
 
 module.exports.allowedFormats = allowedFormats;
 module.exports.isModelFile = isModelFile;
+module.exports.downloadFolder = downloadFolder;

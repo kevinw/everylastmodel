@@ -12,7 +12,7 @@ const generate = require("./generate");
 
 router.use(bodyParser.json());
 
-const downloadedDir = ".downloaded";
+const {downloadFolder} = require("./common");
 
 function handleFile(req, res, { filename, searchTerm }) {
   const indexTemplate = fs
@@ -27,13 +27,13 @@ window.modelUrl = ${util.inspect(relativePath)};
 window.displayText = ${util.inspect(searchTerm)};
 `;
 
-  const filePart = path.relative(path.resolve(downloadedDir), filename);
+  const filePart = path.relative(path.resolve(downloadFolder), filename);
   const humanReadableSize = filesize(fs.statSync(filename).size);
 
   const debugInfo = `
 <pre>
-search term: ${searchTerm}
-model file:  <a href="/file/${filePart}">${filePart}</a> (${humanReadableSize})
+search: "${searchTerm}"
+<a href="/file/${filePart}">${filePart}</a> (${humanReadableSize})
 </pre>`;
 
   const index = indexTemplate
@@ -45,7 +45,7 @@ model file:  <a href="/file/${filePart}">${filePart}</a> (${humanReadableSize})
 router.get(/\/file\/(.*)/, (req, res) => {
   var param = req.params[0];
   var searchTerm = path.basename(param, path.extname(param));
-  var filename = path.resolve(downloadedDir, param);
+  var filename = path.resolve(downloadFolder, param);
   handleFile(req, res, { searchTerm, filename });
 });
 

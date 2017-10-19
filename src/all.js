@@ -11,8 +11,8 @@ function searchRenderAndTween(term) {
     if (err) throw err;
 
     const imageFile = path.resolve(
-      process.getcwd(),
-      `../.images/${term}_${shortid.generate()}.png`
+      process.cwd(),
+      `.images/${term}_${shortid.generate()}.png`
     );
     renderModelFile(file, imageFile, generate.randomText(), function(
       err,

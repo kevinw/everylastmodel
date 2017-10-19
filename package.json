@@ -10,26 +10,26 @@
     "author": "Kevin Watters",
     "license": "ISC",
     "dependencies": {
+        "chalk": "^2.2.0",
         "cheerio": "^1.0.0-rc.2",
-        "crawler": "^1.0.5",
-        "gl": "^4.0.4",
-        "headless-gl": "latest",
-        "node-7z": "^0.4.0",
-        "node-unrar-js": "^0.8.1",
-        "pngjs": "^3.3.0",
         "request": "^2.83.0",
-        "sharp": "^0.18.4",
-        "shortid": "^2.2.8",
-        "three": "^0.87.1",
-        "twit": "^2.2.9",
-        "unzip": "^0.1.11",
-        "xmlhttprequest": "^1.8.0"
+        "shortid": "^2.2.8"
     },
     "devDependencies": {
+        "crawler": "^1.0.5",
         "express": "^4.16.2",
         "filesize": "^3.5.10",
+        "flow-bin": "^0.57.3",
+        "headless-gl": "latest",
         "http-server": "^0.10.0",
+        "node-7z": "^0.4.0",
+        "pngjs": "^3.3.0",
         "prettier": "1.7.4",
-        "request-progress": "^3.0.0"
+        "request-progress": "^3.0.0",
+        "sharp": "^0.18.4",
+        "three": "^0.87.1",
+        "three-debug-draw": "^0.1.0",
+        "twit": "^2.2.9",
+        "xmlhttprequest": "^1.8.0"
     }
 }

@@ -1,4 +1,4 @@
-const downloadFolder = "downloaded";
+const downloadFolder = process.env.EVERYMODEL_DOWNLOAD ? process.env.EVERYMODEL_DOWNLOAD : "downloaded";
 
 const canShowFormats = [
   "json",

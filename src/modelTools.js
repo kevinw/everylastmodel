@@ -60,7 +60,7 @@ function afterDownload(modelInfo, cb, convertToJSON = true) {
         return cb(null, {filename: file, url: modelInfo.url});
       }
 
-    if (!convertToJSON) return cb(null, file);
+    if (!convertToJSON) return cb(null, {filename: file, url: modelInfo.url});
 
     // otherwise convert it
     const outputFile = replaceExtension(file, "json");
@@ -135,6 +135,7 @@ function extractModel(name, cb) {
       task
         .extractFull(name, extractTo)
         .then(function() {
+          fs.unlinkSync(name); // delete original archive
           cb(null, results);
         })
         .catch(err => cb(err));
@@ -159,7 +160,7 @@ if (require.main === module) {
         if (err) {
           console.error(err);
         } else {
-          console.log(chalk.green("DOWNLOADED", result));
+          console.log(chalk.green("DOWNLOADED", result.filename));
         }
         if (i < count)
           next();

@@ -5,6 +5,8 @@ npm install
 tweet.bat
 ```
 
+<img src="https://pbs.twimg.com/media/DMh1JuRUQAAF9R3.png">
+
 Pre-built apps for downloading random models:
 
 * Windows: http://kevinwatters.s3.amazonaws.com/tools/modelTools-win.zip
